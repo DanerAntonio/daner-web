@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Conoce nuestro menú, horarios y formas de hacer tu pedido.">
+  <meta name="theme-color" content="#173b2a">
+  <title>Mi Restaurante | Menú y pedidos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="Ir al inicio">
+      <span class="brand-mark" id="brand-mark">🍽️</span>
+      <span id="business-name">Mi Restaurante</span>
+    </a>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    <nav class="nav" id="nav">
+      <a href="#menu">Menú</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#contacto">Contacto</a>
+      <a class="nav-cta" id="nav-whatsapp" href="#" target="_blank" rel="noopener">Pedir por WhatsApp</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <p class="eyebrow" id="hero-eyebrow">Sabor hecho con cariño</p>
+        <h1 id="hero-title">Comida deliciosa, preparada para ti</h1>
+        <p class="hero-copy" id="hero-copy">Descubre nuestros platos y disfruta de una buena comida.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#menu">Ver menú</a>
+          <a class="button button-light" id="hero-whatsapp" href="#" target="_blank" rel="noopener">Hacer un pedido</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro section" id="nosotros">
+      <div class="intro-photo" id="intro-photo" role="img" aria-label="Plato de comida"></div>
+      <div class="intro-text">
+        <p class="eyebrow">Bienvenidos</p>
+        <h2 id="about-title">El sabor que te hace volver</h2>
+        <p id="about-copy">Preparamos nuestros platos con dedicación, buenos ingredientes y el deseo de que disfrutes cada bocado.</p>
+        <div class="info-pills">
+          <span>Preparado al momento</span>
+          <span>Atención cercana</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu-section section" id="menu">
+      <div class="section-heading">
+        <p class="eyebrow">Hecho para disfrutar</p>
+        <h2>Nuestro menú</h2>
+        <p>Estos son algunos de nuestros favoritos.</p>
+      </div>
+      <div class="menu-grid" id="menu-grid"></div>
+    </section>
+
+    <section class="banner">
+      <div>
+        <p class="eyebrow">¿Se te antojó?</p>
+        <h2>Tu próximo plato está a un mensaje de distancia.</h2>
+      </div>
+      <a class="button button-light" id="banner-whatsapp" href="#" target="_blank" rel="noopener">Pedir ahora</a>
+    </section>
+
+    <section class="contact section" id="contacto">
+      <div class="section-heading">
+        <p class="eyebrow">Estamos para atenderte</p>
+        <h2>Visítanos o escríbenos</h2>
+      </div>
+      <div class="contact-grid">
+        <article class="contact-card"><span class="contact-icon">📍</span><h3>Dirección</h3><p id="business-address">Escribe aquí la dirección del negocio</p></article>
+        <article class="contact-card"><span class="contact-icon">🕒</span><h3>Horario</h3><p id="business-hours">Lunes a sábado · 9:00 a. m. – 9:00 p. m.</p></article>
+        <article class="contact-card"><span class="contact-icon">📱</span><h3>Pedidos</h3><p id="business-phone">WhatsApp disponible</p><a id="contact-whatsapp" href="#" target="_blank" rel="noopener">Escribir por WhatsApp ↗</a></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a class="brand footer-brand" href="#inicio"><span id="footer-mark">🍽️</span><span id="footer-name">Mi Restaurante</span></a>
+    <p id="footer-tagline">Gracias por elegirnos.</p>
+    <small>© <span id="year"></span> <span id="footer-name-small">Mi Restaurante</span>. Todos los derechos reservados.</small>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
