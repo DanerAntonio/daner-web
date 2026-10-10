@@ -62,7 +62,7 @@
     }
   });
 
-  // Estilos del catálogo y del carrito
+  // Estilos del catálogo, carrito y barra móvil
   const styles = document.createElement("style");
   styles.textContent = `
     .menu-card img {
@@ -102,7 +102,7 @@
       margin-top: 12px;
     }
 
-    /* Catálogo y carrito lado a lado en computador */
+    /* Computador: catálogo y carrito en dos columnas */
     .order-layout {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
@@ -139,6 +139,25 @@
 
     #order-cart h2 {
       margin-top: 0;
+    }
+
+    .cart-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cart-close {
+      display: none;
+      border: 0;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      background: #eee;
+      color: #222;
+      font-size: 1.5rem;
+      cursor: pointer;
     }
 
     .cart-line {
@@ -209,7 +228,13 @@
       color: #555;
     }
 
-    /* En celular, catálogo arriba y carrito debajo */
+    /* La barra y el fondo no aparecen en computador */
+    .mobile-cart-bar,
+    .cart-overlay {
+      display: none;
+    }
+
+    /* Celular: catálogo en una columna y carrito desplegable */
     @media (max-width: 820px) {
       .order-layout {
         display: flex;
@@ -225,22 +250,96 @@
         margin: 0 auto;
       }
 
+      /* El carrito se abre como panel desde abajo */
       #order-cart {
-        position: static;
+        display: none;
+        position: fixed;
+        z-index: 1002;
+        left: 0;
+        right: 0;
+        bottom: 0;
         top: auto;
         width: 100%;
-        max-width: 500px;
-        max-height: none;
-        overflow: visible;
+        max-width: 600px;
+        max-height: 82vh;
+        max-height: 82dvh;
+        overflow-y: auto;
         margin: 0 auto;
+        padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
+        border: 1px solid #ddd;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, .2);
+      }
+
+      #order-cart.cart-open {
+        display: block;
+      }
+
+      .cart-close {
+        display: inline-block;
+        flex-shrink: 0;
+      }
+
+      /* Fondo oscuro detrás del carrito abierto */
+      .cart-overlay.visible {
+        display: block;
+        position: fixed;
+        z-index: 1001;
+        inset: 0;
+        background: rgba(0, 0, 0, .48);
+      }
+
+      /* Barra fija que siempre muestra el estado del pedido */
+      .mobile-cart-bar {
+        display: flex;
+        position: fixed;
+        z-index: 1000;
+        left: 12px;
+        right: 12px;
+        bottom: calc(10px + env(safe-area-inset-bottom));
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 16px;
+        border: 0;
+        border-radius: 14px;
+        background: var(--primary, #173b2a);
+        color: white;
+        box-shadow: 0 5px 24px rgba(0, 0, 0, .24);
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .mobile-cart-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .mobile-cart-label {
+        font-size: .9rem;
+        font-weight: 800;
+      }
+
+      .mobile-cart-total {
+        font-size: .85rem;
+        opacity: .92;
+      }
+
+      .mobile-cart-action {
+        flex-shrink: 0;
+        font-weight: 800;
+      }
+
+      /* Evita que la barra tape el final de la página */
+      body {
+        padding-bottom: 90px;
       }
     }
 
     @media (max-width: 480px) {
-      #order-cart {
-        padding: 15px;
-      }
-
       .menu-card img {
         height: 190px;
       }
@@ -254,11 +353,14 @@
     return;
   }
 
-  // Crear el carrito y ubicarlo junto al catálogo
+  // Crear la sección del carrito
   const cartSection = document.createElement("section");
   cartSection.id = "order-cart";
   cartSection.innerHTML = `
-    <h2>Tu pedido</h2>
+    <div class="cart-heading">
+      <h2>Tu pedido</h2>
+      <button type="button" class="cart-close" id="close-cart" aria-label="Cerrar carrito">×</button>
+    </div>
     <p class="cart-note">Agrega los platos que quieras, ajusta las cantidades y revisa el total.</p>
     <div id="cart-items" aria-live="polite"></div>
     <p id="cart-empty" class="cart-empty">Todavía no has agregado platos.</p>
@@ -274,6 +376,57 @@
 
   menuGrid.parentNode.insertBefore(orderLayout, menuGrid);
   orderLayout.append(menuGrid, cartSection);
+
+  // Fondo y barra fija para celulares
+  const cartOverlay = document.createElement("div");
+  cartOverlay.className = "cart-overlay";
+  cartOverlay.id = "cart-overlay";
+  cartOverlay.setAttribute("aria-hidden", "true");
+  document.body.appendChild(cartOverlay);
+
+  const mobileCartBar = document.createElement("button");
+  mobileCartBar.type = "button";
+  mobileCartBar.className = "mobile-cart-bar";
+  mobileCartBar.id = "mobile-cart-bar";
+  mobileCartBar.setAttribute("aria-controls", "order-cart");
+  mobileCartBar.setAttribute("aria-expanded", "false");
+  mobileCartBar.innerHTML = `
+    <span class="mobile-cart-info">
+      <span class="mobile-cart-label" id="mobile-cart-count">Tu pedido · 0 productos</span>
+      <span class="mobile-cart-total" id="mobile-cart-total">Total: $0</span>
+    </span>
+    <span class="mobile-cart-action" id="mobile-cart-action">Ver pedido ↓</span>
+  `;
+  document.body.appendChild(mobileCartBar);
+
+  function openCart() {
+    cartSection.classList.add("cart-open");
+    cartOverlay.classList.add("visible");
+    cartOverlay.setAttribute("aria-hidden", "false");
+    mobileCartBar.setAttribute("aria-expanded", "true");
+    $("mobile-cart-action").textContent = "Cerrar ×";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeCart() {
+    cartSection.classList.remove("cart-open");
+    cartOverlay.classList.remove("visible");
+    cartOverlay.setAttribute("aria-hidden", "true");
+    mobileCartBar.setAttribute("aria-expanded", "false");
+    $("mobile-cart-action").textContent = "Ver pedido ↓";
+    document.body.style.overflow = "";
+  }
+
+  mobileCartBar.addEventListener("click", () => {
+    if (cartSection.classList.contains("cart-open")) {
+      closeCart();
+    } else {
+      openCart();
+    }
+  });
+
+  $("close-cart").addEventListener("click", closeCart);
+  cartOverlay.addEventListener("click", closeCart);
 
   // Mostrar platos y precios
   menu.forEach((item, index) => {
@@ -313,8 +466,6 @@
       const current = cart.get(index) || 0;
       cart.set(index, current + 1);
       renderCart();
-
-      // Ya no se desplaza automáticamente al carrito.
     });
 
     bottom.append(price);
@@ -331,6 +482,7 @@
     container.replaceChildren();
 
     let total = 0;
+    let totalQuantity = 0;
 
     cart.forEach((quantity, index) => {
       const item = menu[index];
@@ -339,6 +491,7 @@
       const price = Number(item.priceValue) || 0;
       const subtotal = price * quantity;
       total += subtotal;
+      totalQuantity += quantity;
 
       const line = document.createElement("div");
       line.className = "cart-line";
@@ -405,6 +558,11 @@
 
     emptyMessage.hidden = cart.size > 0;
     totalElement.textContent = money(total);
+
+    // Actualizar siempre la barra fija del celular
+    $("mobile-cart-count").textContent =
+      `Tu pedido · ${totalQuantity} ${totalQuantity === 1 ? "producto" : "productos"}`;
+    $("mobile-cart-total").textContent = `Total: ${money(total)}`;
   }
 
   $("send-order").addEventListener("click", () => {
