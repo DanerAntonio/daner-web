@@ -66,10 +66,12 @@
   const styles = document.createElement("style");
   styles.textContent = `
     .menu-card img {
+      display: block;
       width: 100%;
       height: 220px;
       object-fit: cover;
     }
+
     .order-link, .add-to-cart, .cart-action, .send-order {
       display: inline-block;
       border: 0;
@@ -82,6 +84,7 @@
       text-decoration: none;
       cursor: pointer;
     }
+
     .menu-card-bottom {
       display: flex;
       flex-wrap: wrap;
@@ -89,18 +92,55 @@
       justify-content: space-between;
       gap: 12px;
     }
-    .price { font-weight: 800; }
-    .add-to-cart { width: 100%; margin-top: 12px; }
+
+    .price {
+      font-weight: 800;
+    }
+
+    .add-to-cart {
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    /* Catálogo y carrito lado a lado en computador */
+    .order-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+      gap: 24px;
+      align-items: start;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .order-layout #menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      min-width: 0;
+      max-width: none;
+      margin: 0;
+    }
+
     #order-cart {
-      margin: 35px auto;
+      position: sticky;
+      top: 90px;
+      margin: 0;
       padding: 22px;
       border: 1px solid #ddd;
       border-radius: 16px;
-      max-width: 900px;
+      width: 100%;
+      min-width: 0;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
       background: #fff;
       color: #222;
     }
-    #order-cart h2 { margin-top: 0; }
+
+    #order-cart h2 {
+      margin-top: 0;
+    }
+
     .cart-line {
       display: grid;
       grid-template-columns: 76px minmax(0, 1fr);
@@ -108,13 +148,18 @@
       padding: 14px 0;
       border-bottom: 1px solid #e5e5e5;
     }
+
     .cart-line img {
       width: 76px;
       height: 76px;
       object-fit: cover;
       border-radius: 10px;
     }
-    .cart-line-title { font-weight: 800; }
+
+    .cart-line-title {
+      font-weight: 800;
+    }
+
     .cart-line-controls {
       display: flex;
       flex-wrap: wrap;
@@ -122,13 +167,16 @@
       gap: 8px;
       margin-top: 8px;
     }
+
     .cart-action {
       padding: 5px 12px;
       min-width: 36px;
     }
+
     .remove-item {
       background: #8b2525;
     }
+
     #order-comments {
       display: block;
       box-sizing: border-box;
@@ -140,17 +188,62 @@
       border-radius: 9px;
       font: inherit;
     }
+
     .cart-total {
       margin: 20px 0;
       font-size: 1.35rem;
       font-weight: 800;
     }
-    .cart-empty { color: #555; }
-    .send-order { width: 100%; padding: 14px; }
-    .cart-note { font-size: .9rem; color: #555; }
+
+    .cart-empty {
+      color: #555;
+    }
+
+    .send-order {
+      width: 100%;
+      padding: 14px;
+    }
+
+    .cart-note {
+      font-size: .9rem;
+      color: #555;
+    }
+
+    /* En celular, catálogo arriba y carrito debajo */
+    @media (max-width: 820px) {
+      .order-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      .order-layout #menu-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      #order-cart {
+        position: static;
+        top: auto;
+        width: 100%;
+        max-width: 500px;
+        max-height: none;
+        overflow: visible;
+        margin: 0 auto;
+      }
+    }
+
     @media (max-width: 480px) {
-      #order-cart { padding: 15px; }
-      .menu-card img { height: 190px; }
+      #order-cart {
+        padding: 15px;
+      }
+
+      .menu-card img {
+        height: 190px;
+      }
     }
   `;
   document.head.appendChild(styles);
@@ -161,7 +254,7 @@
     return;
   }
 
-  // Crear la sección del carrito debajo del catálogo
+  // Crear el carrito y ubicarlo junto al catálogo
   const cartSection = document.createElement("section");
   cartSection.id = "order-cart";
   cartSection.innerHTML = `
@@ -175,7 +268,12 @@
     <button type="button" class="send-order" id="send-order">Enviar pedido por WhatsApp</button>
     <p class="cart-note">El pedido se enviará a WhatsApp para que puedas revisarlo antes de enviarlo.</p>
   `;
-  menuGrid.insertAdjacentElement("afterend", cartSection);
+
+  const orderLayout = document.createElement("div");
+  orderLayout.className = "order-layout";
+
+  menuGrid.parentNode.insertBefore(orderLayout, menuGrid);
+  orderLayout.append(menuGrid, cartSection);
 
   // Mostrar platos y precios
   menu.forEach((item, index) => {
@@ -210,11 +308,13 @@
     addButton.type = "button";
     addButton.className = "add-to-cart";
     addButton.textContent = "Agregar al pedido";
+
     addButton.addEventListener("click", () => {
       const current = cart.get(index) || 0;
       cart.set(index, current + 1);
       renderCart();
-      cartSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+      // Ya no se desplaza automáticamente al carrito.
     });
 
     bottom.append(price);
@@ -227,6 +327,7 @@
     const container = $("cart-items");
     const emptyMessage = $("cart-empty");
     const totalElement = $("cart-total-value");
+
     container.replaceChildren();
 
     let total = 0;
@@ -248,9 +349,10 @@
       image.loading = "lazy";
 
       const details = document.createElement("div");
+
       const title = document.createElement("div");
       title.className = "cart-line-title";
-      title.textContent = item.name;
+      title.textContent = item.name || "Plato";
 
       const subtotalText = document.createElement("div");
       subtotalText.textContent = `${quantity} × ${money(price)} = ${money(subtotal)}`;
@@ -263,6 +365,7 @@
       decrease.className = "cart-action";
       decrease.textContent = "−";
       decrease.setAttribute("aria-label", `Quitar una unidad de ${item.name}`);
+
       decrease.addEventListener("click", () => {
         const next = (cart.get(index) || 0) - 1;
         if (next <= 0) cart.delete(index);
@@ -278,6 +381,7 @@
       increase.className = "cart-action";
       increase.textContent = "+";
       increase.setAttribute("aria-label", `Agregar una unidad de ${item.name}`);
+
       increase.addEventListener("click", () => {
         cart.set(index, (cart.get(index) || 0) + 1);
         renderCart();
@@ -287,6 +391,7 @@
       remove.type = "button";
       remove.className = "cart-action remove-item";
       remove.textContent = "Eliminar";
+
       remove.addEventListener("click", () => {
         cart.delete(index);
         renderCart();

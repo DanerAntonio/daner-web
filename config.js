@@ -19,16 +19,11 @@ window.BUSINESS_CONFIG = {
   aboutImage: "fotos/posta.jpeg",
 
   menu: [
-    {
-      name: "Menú del día",
-      description: "Incluye arroz, papitas fritas, frijoles, sopa del día, ensalada, jugo natural, huevo y aguacate. ¡Todo con el toque y sabor de Claudia!",
-      priceValue: 18000,
-      image: "fotos/res.jpeg"
-    },
+   
     {
       name: "Bandeja paisa",
       description: "Una deliciosa bandeja con sabor tradicional y sazón casera.",
-      priceValue: 24983,
+      priceValue: 25000,
       image: "fotos/bandeja.jpeg"
     },
     {
